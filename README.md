@@ -12,28 +12,6 @@ I'm using `PyTorch 0.4` in `Python 3.6`.
 
 ---
 
-**27 Jan 2020**: Working code for two new tutorials has been added — [Super-Resolution](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Super-Resolution) and [Machine Translation](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Machine-Translation)
-
----
-
-# Contents
-
-[***Objective***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Object-Detection#objective)
-
-[***Concepts***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Object-Detection#concepts)
-
-[***Overview***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Object-Detection#overview)
-
-[***Implementation***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Object-Detection#implementation)
-
-[***Training***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Object-Detection#training)
-
-[***Evaluation***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Object-Detection#evaluation)
-
-[***Inference***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Object-Detection#inference)
-
-[***Frequently Asked Questions***](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Object-Detection#faqs)
-
 # Objective
 
 **To build a model that can detect and localize specific objects in images.**
@@ -102,19 +80,19 @@ There are more examples at the [end of the tutorial](https://github.com/sgrvinod
 
 # Concepts
 
-* **Object Detection**. duh.
+- **Object Detection**. duh.
 
-* **Single-Shot Detection**. Earlier architectures for object detection consisted of two distinct stages – a region proposal network that performs object localization and a classifier for detecting the types of objects in the proposed regions. Computationally, these can be very expensive and therefore ill-suited for real-world, real-time applications. Single-shot models encapsulate both localization and detection tasks in a single forward sweep of the network, resulting in significantly faster detections while deployable on lighter hardware.
+- **Single-Shot Detection**. Earlier architectures for object detection consisted of two distinct stages – a region proposal network that performs object localization and a classifier for detecting the types of objects in the proposed regions. Computationally, these can be very expensive and therefore ill-suited for real-world, real-time applications. Single-shot models encapsulate both localization and detection tasks in a single forward sweep of the network, resulting in significantly faster detections while deployable on lighter hardware.
 
-* **Multiscale Feature Maps**. In image classification tasks, we base our predictions on the final convolutional feature map – the smallest but deepest representation of the original image. In object detection, feature maps from intermediate convolutional layers can also be _directly_ useful because they represent the original image at different scales. Therefore, a fixed-size filter operating on different feature maps will be able to detect objects of various sizes.
+- **Multiscale Feature Maps**. In image classification tasks, we base our predictions on the final convolutional feature map – the smallest but deepest representation of the original image. In object detection, feature maps from intermediate convolutional layers can also be _directly_ useful because they represent the original image at different scales. Therefore, a fixed-size filter operating on different feature maps will be able to detect objects of various sizes.
 
-* **Priors**. These are pre-computed boxes defined at specific positions on specific feature maps, with specific aspect ratios and scales. They are carefully chosen to match the characteristics of objects' bounding boxes (i.e. the ground truths) in the dataset.
+- **Priors**. These are pre-computed boxes defined at specific positions on specific feature maps, with specific aspect ratios and scales. They are carefully chosen to match the characteristics of objects' bounding boxes (i.e. the ground truths) in the dataset.
 
-* **Multibox**. This is [a technique](https://arxiv.org/abs/1312.2249) that formulates predicting an object's bounding box as a _regression_ problem, wherein a detected object's coordinates are regressed to its ground truth's coordinates. In addition, for each predicted box, scores are generated for various object types. Priors serve as feasible starting points for predictions because they are modeled on the ground truths. Therefore, there will be as many predicted boxes as there are priors, most of whom will contain no object.
+- **Multibox**. This is [a technique](https://arxiv.org/abs/1312.2249) that formulates predicting an object's bounding box as a _regression_ problem, wherein a detected object's coordinates are regressed to its ground truth's coordinates. In addition, for each predicted box, scores are generated for various object types. Priors serve as feasible starting points for predictions because they are modeled on the ground truths. Therefore, there will be as many predicted boxes as there are priors, most of whom will contain no object.
 
-* **Hard Negative Mining**. This refers to explicitly choosing the most egregious false positives predicted by a model and forcing it to learn from these examples. In other words, we are mining only those negatives that the model found _hardest_ to identify correctly. In the context of object detection, where the vast majority of predicted boxes do not contain an object, this also serves to reduce the negative-positive imbalance.
+- **Hard Negative Mining**. This refers to explicitly choosing the most egregious false positives predicted by a model and forcing it to learn from these examples. In other words, we are mining only those negatives that the model found _hardest_ to identify correctly. In the context of object detection, where the vast majority of predicted boxes do not contain an object, this also serves to reduce the negative-positive imbalance.
 
-* **Non-Maximum Suppression**. At any given location, multiple priors can overlap significantly. Therefore, predictions arising out of these priors could actually be duplicates of the same object. Non-Maximum Suppression (NMS) is a means to remove redundant predictions by suppressing all but the one with the maximum score.
+- **Non-Maximum Suppression**. At any given location, multiple priors can overlap significantly. Therefore, predictions arising out of these priors could actually be duplicates of the same object. Non-Maximum Suppression (NMS) is a means to remove redundant predictions by suppressing all but the one with the maximum score.
 
 # Overview
 
@@ -175,11 +153,11 @@ Multibox is a technique for detecting objects where a prediction consists of two
 
 The SSD is a purely convolutional neural network (CNN) that we can organize into three parts –
 
-- __Base convolutions__ derived from an existing image classification architecture that will provide lower-level feature maps.
+- **Base convolutions** derived from an existing image classification architecture that will provide lower-level feature maps.
 
-- __Auxiliary convolutions__ added on top of the base network that will provide higher-level feature maps.
+- **Auxiliary convolutions** added on top of the base network that will provide higher-level feature maps.
 
-- __Prediction convolutions__ that will locate and identify objects in these feature maps.
+- **Prediction convolutions** that will locate and identify objects in these feature maps.
 
 The paper demonstrates two variants of the model called the SSD300 and the SSD512. The suffixes represent the size of the input image. Although the two networks differ slightly in the way they are constructed, they are in principle the same. The SSD512 is just a larger network and results in marginally better performance.
 
@@ -197,7 +175,7 @@ The authors of the paper employ the **VGG-16 architecture** as their base networ
 
 ![](./img/vgg16.PNG)
 
-They recommend using one that's pretrained on the _ImageNet Large Scale Visual Recognition Competition (ILSVRC)_ classification task. Luckily, there's one already available in PyTorch, as are other popular architectures. If you wish, you could opt for something larger like the ResNet. Just be mindful of the computational requirements.  
+They recommend using one that's pretrained on the _ImageNet Large Scale Visual Recognition Competition (ILSVRC)_ classification task. Luckily, there's one already available in PyTorch, as are other popular architectures. If you wish, you could opt for something larger like the ResNet. Just be mindful of the computational requirements.
 
 As per the paper, **we've to make some changes to this pretrained network** to adapt it to our own challenge of object detection. Some are logical and necessary, while others are mostly a matter of convenience or preference.
 
@@ -263,7 +241,7 @@ To remedy this, the authors opt to **reduce both their number and the size of ea
 
 - `conv7` will use `1024` filters, each with dimensions `1, 1, 1024`. Therefore, the parameters are subsampled from `4096, 1, 1, 4096` to `1024, 1, 1, 1024`.
 
-Based on the references in the paper, we will **subsample by picking every `m`th parameter along a particular dimension**, in a process known as [_decimation_](https://en.wikipedia.org/wiki/Downsampling_(signal_processing)).  
+Based on the references in the paper, we will **subsample by picking every `m`th parameter along a particular dimension**, in a process known as [_decimation_](<https://en.wikipedia.org/wiki/Downsampling_(signal_processing)>).
 
 Since the kernel of `conv6` is decimated from `7, 7` to `3,  3` by keeping only every 3rd value, there are now _holes_ in the kernel. Therefore, we would need to **make the kernel dilated or _atrous_**.
 
@@ -307,17 +285,17 @@ In defining the priors, the authors specify that –
 
 - **if a prior has a scale `s`, then its area is equal to that of a square with side `s`**. The largest feature map, `conv4_3`, will have priors with a scale of `0.1`, i.e. `10%` of image's dimensions, while the rest have priors with scales linearly increasing from `0.2` to `0.9`. As you can see, larger feature maps have priors with smaller scales and are therefore ideal for detecting smaller objects.
 
-- **At _each_ position on a feature map, there will be priors of various aspect ratios**. All feature maps will have priors with ratios `1:1, 2:1, 1:2`. The intermediate feature maps of `conv7`, `conv8_2`, and `conv9_2` will _also_ have priors with ratios `3:1, 1:3`. Moreover, all feature maps will have *one extra prior* with an aspect ratio of `1:1` and at a scale that is the geometric mean of the scales of the current and subsequent feature map.
+- **At _each_ position on a feature map, there will be priors of various aspect ratios**. All feature maps will have priors with ratios `1:1, 2:1, 1:2`. The intermediate feature maps of `conv7`, `conv8_2`, and `conv9_2` will _also_ have priors with ratios `3:1, 1:3`. Moreover, all feature maps will have _one extra prior_ with an aspect ratio of `1:1` and at a scale that is the geometric mean of the scales of the current and subsequent feature map.
 
-| Feature Map From | Feature Map Dimensions | Prior Scale | Aspect Ratios | Number of Priors per Position | Total Number of Priors on this Feature Map |
-| :-----------: | :-----------: | :-----------: | :-----------: | :-----------: | :-----------: |
-| `conv4_3`      | 38, 38       | 0.1 | 1:1, 2:1, 1:2 + an extra prior | 4 | 5776 |
-| `conv7`      | 19, 19       | 0.2 | 1:1, 2:1, 1:2, 3:1, 1:3 + an extra prior | 6 | 2166 |
-| `conv8_2`      | 10, 10       | 0.375 | 1:1, 2:1, 1:2, 3:1, 1:3 + an extra prior | 6 | 600 |
-| `conv9_2`      | 5, 5       | 0.55 | 1:1, 2:1, 1:2, 3:1, 1:3 + an extra prior | 6 | 150 |
-| `conv10_2`      | 3,  3       | 0.725 | 1:1, 2:1, 1:2 + an extra prior | 4 | 36 |
-| `conv11_2`      | 1, 1       | 0.9 | 1:1, 2:1, 1:2 + an extra prior | 4 | 4 |
-| **Grand Total**      |    –    | – | – | – | **8732 priors** |
+| Feature Map From | Feature Map Dimensions | Prior Scale |              Aspect Ratios               | Number of Priors per Position | Total Number of Priors on this Feature Map |
+| :--------------: | :--------------------: | :---------: | :--------------------------------------: | :---------------------------: | :----------------------------------------: |
+|    `conv4_3`     |         38, 38         |     0.1     |      1:1, 2:1, 1:2 + an extra prior      |               4               |                    5776                    |
+|     `conv7`      |         19, 19         |     0.2     | 1:1, 2:1, 1:2, 3:1, 1:3 + an extra prior |               6               |                    2166                    |
+|    `conv8_2`     |         10, 10         |    0.375    | 1:1, 2:1, 1:2, 3:1, 1:3 + an extra prior |               6               |                    600                     |
+|    `conv9_2`     |          5, 5          |    0.55     | 1:1, 2:1, 1:2, 3:1, 1:3 + an extra prior |               6               |                    150                     |
+|    `conv10_2`    |          3, 3          |    0.725    |      1:1, 2:1, 1:2 + an extra prior      |               4               |                     36                     |
+|    `conv11_2`    |          1, 1          |     0.9     |      1:1, 2:1, 1:2 + an extra prior      |               4               |                     4                      |
+| **Grand Total**  |           –            |      –      |                    –                     |               –               |              **8732 priors**               |
 
 There are a total of 8732 priors defined for the SSD300!
 
@@ -353,7 +331,7 @@ This means that **we use each prior as an approximate starting point and then fi
 
 So if each predicted bounding box is a slight deviation from a prior, and our goal is to calculate this deviation, we need a way to measure or quantify it.
 
-Consider a cat, its predicted bounding box, and the prior with which the prediction was made.  
+Consider a cat, its predicted bounding box, and the prior with which the prediction was made.
 
 ![](./img/ecs1.PNG)
 
@@ -437,15 +415,15 @@ Obviously, our total loss must be an **aggregate of losses from both types of pr
 
 Then, there are a few questions to be answered –
 
->_What loss function will be used for the regressed bounding boxes?_
+> _What loss function will be used for the regressed bounding boxes?_
 
->_Will we use multiclass cross-entropy for the class scores?_
+> _Will we use multiclass cross-entropy for the class scores?_
 
->_In what ratio will we combine them?_
+> _In what ratio will we combine them?_
 
->_How do we match predicted boxes to their ground truths?_
+> _How do we match predicted boxes to their ground truths?_
 
->_We have 8732 predictions! Won't most of these contain no object? Do we even consider them?_
+> _We have 8732 predictions! Won't most of these contain no object? Do we even consider them?_
 
 Phew. Let's get to work.
 
@@ -465,7 +443,7 @@ Priors enable us to do exactly this!
 
 - On the other hand, a handful of priors will actually **overlap significantly (greater than `0.5`)** with an object, and can be said to "contain" that object. These are **_positive_ matches**.
 
-- Now that we have **matched each of the 8732 priors to a ground truth**, we have, in effect, also **matched the corresponding 8732 predictions to a ground truth**.  
+- Now that we have **matched each of the 8732 priors to a ground truth**, we have, in effect, also **matched the corresponding 8732 predictions to a ground truth**.
 
 Let's reproduce this logic with an example.
 
@@ -567,7 +545,7 @@ So, if we were to **draw up the Jaccard similarities between all the candidates 
 
 Thus, we've eliminated the rogue candidates – one of each animal.
 
-This process is called __Non-Maximum Suppression (NMS)__ because when multiple candidates are found to overlap significantly with each other such that they could be referencing the same object, **we suppress all but the one with the maximum score**.
+This process is called **Non-Maximum Suppression (NMS)** because when multiple candidates are found to overlap significantly with each other such that they could be referencing the same object, **we suppress all but the one with the maximum score**.
 
 Algorithmically, it is carried out as follows –
 
@@ -615,7 +593,7 @@ Each object is represented by –
 
 - a label (one of the object types mentioned above)
 
--  a perceived detection difficulty (either `0`, meaning _not difficult_, or `1`, meaning _difficult_)
+- a perceived detection difficulty (either `0`, meaning _not difficult_, or `1`, meaning _difficult_)
 
 #### Download
 
@@ -627,7 +605,7 @@ Specfically, you will need to download the following VOC datasets –
 
 - [2007 _test_](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar) (451MB)
 
-Consistent with the paper, the two _trainval_ datasets are to be used for training, while the VOC 2007 _test_ will serve as our test data.  
+Consistent with the paper, the two _trainval_ datasets are to be used for training, while the VOC 2007 _test_ will serve as our test data.
 
 Make sure you extract both the VOC 2007 _trainval_ and 2007 _test_ data to the same location, i.e. merge them.
 
@@ -840,28 +818,28 @@ The model scores **77.2 mAP**, same as the result reported in the paper.
 
 Class-wise average precisions (not scaled to 100) are listed below.
 
-| Class | Average Precision |
-| :-----: | :------: |
-| _aeroplane_ | 0.7887580990791321 |
-| _bicycle_ | 0.8351995348930359 |
-| _bird_ | 0.7623348236083984 |
-| _boat_ | 0.7218425273895264 |
-| _bottle_ | 0.45978495478630066 |
-| _bus_ | 0.8705356121063232 |
-| _car_ | 0.8655831217765808 |
-| _cat_ | 0.8828985095024109 |
-| _chair_ | 0.5917483568191528 |
-| _cow_ | 0.8255912661552429 |
-| _diningtable_ | 0.756867527961731 |
-| _dog_ | 0.856262743473053 |
-| _horse_ | 0.8778411149978638 |
-| _motorbike_ | 0.8316892385482788 |
-| _person_ | 0.7884440422058105 |
-| _pottedplant_ | 0.5071538090705872 |
-| _sheep_ | 0.7936667799949646 |
-| _sofa_ | 0.7998116612434387 |
-| _train_ | 0.8655905723571777 |
-| _tvmonitor_ | 0.7492395043373108 |
+|     Class     |  Average Precision  |
+| :-----------: | :-----------------: |
+|  _aeroplane_  | 0.7887580990791321  |
+|   _bicycle_   | 0.8351995348930359  |
+|    _bird_     | 0.7623348236083984  |
+|    _boat_     | 0.7218425273895264  |
+|   _bottle_    | 0.45978495478630066 |
+|     _bus_     | 0.8705356121063232  |
+|     _car_     | 0.8655831217765808  |
+|     _cat_     | 0.8828985095024109  |
+|    _chair_    | 0.5917483568191528  |
+|     _cow_     | 0.8255912661552429  |
+| _diningtable_ |  0.756867527961731  |
+|     _dog_     |  0.856262743473053  |
+|    _horse_    | 0.8778411149978638  |
+|  _motorbike_  | 0.8316892385482788  |
+|   _person_    | 0.7884440422058105  |
+| _pottedplant_ | 0.5071538090705872  |
+|    _sheep_    | 0.7936667799949646  |
+|    _sofa_     | 0.7998116612434387  |
+|    _train_    | 0.8655905723571777  |
+|  _tvmonitor_  | 0.7492395043373108  |
 
 You can see that some objects, like bottles and potted plants, are considerably harder to detect than others.
 
@@ -957,7 +935,7 @@ There are no one-size-fits-all values for `min_score`, `max_overlap`, and `top_k
 
 # FAQs
 
-__I noticed that priors often overshoot the `3, 3` kernel employed in the prediction convolutions. How can the kernel detect a bound (of an object) outside it?__
+**I noticed that priors often overshoot the `3, 3` kernel employed in the prediction convolutions. How can the kernel detect a bound (of an object) outside it?**
 
 Don't confuse the kernel and its _receptive field_, which is the area of the original image that is represented in the kernel's field-of-view.
 
@@ -969,7 +947,7 @@ Keep in mind that the receptive field grows with every successive convolution. F
 
 ---
 
-__While training, why can't we match predicted boxes directly to their ground truths?__
+**While training, why can't we match predicted boxes directly to their ground truths?**
 
 We cannot directly check for overlap or coincidence between predicted boxes and ground truth objects to match them because predicted boxes are not to be considered reliable, _especially_ during the training process. This is the very reason we are trying to evaluate them in the first place!
 
@@ -977,13 +955,13 @@ And this is why priors are especially useful. We can match a predicted box to a 
 
 ---
 
-__Why do we even have a _background_ class if we're only checking which _non-background_ classes meet the threshold?__
+**Why do we even have a _background_ class if we're only checking which _non-background_ classes meet the threshold?**
 
 When there is no object in the approximate field of the prior, a high score for _background_ will dilute the scores of the other classes such that they will not meet the detection threshold.
 
 ---
 
-__Why not simply choose the class with the highest score instead of using a threshold?__
+**Why not simply choose the class with the highest score instead of using a threshold?**
 
 I think that's a valid strategy. After all, we implicitly conditioned the model to choose _one_ class when we trained it with the Cross Entropy loss. But you will find that you won't achieve the same performance as you would with a threshold.
 
@@ -991,9 +969,8 @@ I suspect this is because object detection is open-ended enough that there's roo
 
 Redundant detections aren't really a problem since we're NMS-ing the hell out of 'em.
 
-
 ---
 
-__Sorry, but I gotta ask... _[what's in the boooox?!](https://cnet4.cbsistatic.com/img/cLD5YVGT9pFqx61TuMtcSBtDPyY=/570x0/2017/01/14/6d8103f7-a52d-46de-98d0-56d0e9d79804/se7en.png)___
+**Sorry, but I gotta ask... _[what's in the boooox?!](https://cnet4.cbsistatic.com/img/cLD5YVGT9pFqx61TuMtcSBtDPyY=/570x0/2017/01/14/6d8103f7-a52d-46de-98d0-56d0e9d79804/se7en.png)_**
 
 Ha.
